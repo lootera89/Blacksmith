@@ -135,16 +135,16 @@ int main(int, char**)
 
 		// Here goes the window
 		if (ImGui::Begin("window1ID", &opend, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove)) {
-			const char* ButtonText = "Start A Test";
+			const char* MainText = "Start A Test";
+			ImGui::SetCursorPosY(40.0f);
+			ImGui::SetCursorPosX(ImGui::GetWindowWidth() / 2 - ImGui::CalcTextSize(MainText).x / 2);
+			ImGui::Text(MainText);
 
-			ImGui::SetCursorPosX(ImGui::GetWindowWidth() / 2 - ImGui::CalcTextSize(ButtonText).x / 2);
-			if (ImGui::Button(ButtonText, ImVec2(100, 50))) {
-				isb1pressed = true;
-			}
-			if (isb1pressed) {
-				ImGui::Text("Hiii");
-			   }
-
+            static char inputBuffer[2056] = { 0 };
+			ImVec2 MultLnTxtSize = ImVec2(ImGui::GetIO().DisplaySize.x * 0.7, ImGui::GetIO().DisplaySize.y * 0.7);
+			ImGui::SetCursorPosY(150.0f);
+			ImGui::SetCursorPosX(ImGui::GetWindowWidth() / 2 - MultLnTxtSize.x / 2);
+            ImGui::InputTextMultiline("##input", inputBuffer, sizeof(inputBuffer), MultLnTxtSize, ImGuiInputTextFlags_AllowTabInput);
 		} ImGui::End();
 
 		// Rendering
