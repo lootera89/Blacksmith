@@ -4,5 +4,5 @@
 
 int main() {
 	return 0;
-	//lmao XD XD
+	//lmao XD XD funi
 	}
