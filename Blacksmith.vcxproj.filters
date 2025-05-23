@@ -7,7 +7,7 @@
     <Filter Include="IMGUI\backends">
       <UniqueIdentifier>{73d3455c-090a-4a4f-abad-4aef4963207a}</UniqueIdentifier>
     </Filter>
-    <Filter Include="SRC">
+    <Filter Include="Core">
       <UniqueIdentifier>{b5c15a8a-dd62-4273-ba31-5990dd08b0d5}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
@@ -60,7 +60,7 @@
       <Filter>IMGUI\backends</Filter>
     </ClCompile>
     <ClCompile Include="Core\main.cpp">
-      <Filter>SRC</Filter>
+      <Filter>Core</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
