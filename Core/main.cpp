@@ -33,10 +33,11 @@ int main(int, char**)
 {
 	// Create application window
 	//ImGui_ImplWin32_EnableDpiAwareness();
+	int scrnw = GetSystemMetrics(SM_CXSCREEN);
+	int scrny = GetSystemMetrics(SM_CYSCREEN);
 	WNDCLASSEXW wc = { sizeof(wc), CS_CLASSDC, WndProc, 0L, 0L, GetModuleHandle(nullptr), nullptr, nullptr, nullptr, nullptr, L"ImGui Example", nullptr };
 	::RegisterClassExW(&wc);
-	HWND hwnd = ::CreateWindowW(wc.lpszClassName, L"Dear ImGui DirectX11 Example", WS_OVERLAPPEDWINDOW, 100, 100, 1280, 800, nullptr, nullptr, wc.hInstance, nullptr);
-
+	HWND hwnd = ::CreateWindowW(wc.lpszClassName, L"Dear ImGui DirectX11 Example", WS_POPUP, 0, 0, scrnw, scrny, nullptr, nullptr, wc.hInstance, nullptr);
 	// Initialize Direct3D
 	if (!CreateDeviceD3D(hwnd))
 	{
@@ -132,17 +133,23 @@ int main(int, char**)
 		// Here goes the window
 		ImGui::SetNextWindowPos(ImVec2(0.0f, 0.0f));
 		ImGui::SetNextWindowSize(ImGui::GetIO().DisplaySize);
-		if (ImGui::Begin("window1ID", &opend, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove)) {
+		ImGuiStyle& style = ImGui::GetStyle();
+		style.Colors[ImGuiCol_WindowBg] = ImColor(0.0f, 0.0f, 0.0f, 1.0f);
+		style.WindowBorderSize = 0.0f;
+
+		if (ImGui::Begin("##window1ID", &opend, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove)) {
 			const char* MainText = "Start A Test";
+			ImGuiStyle& style = ImGui::GetStyle();
 			ImGui::SetCursorPosY(40.0f);
 			ImGui::SetCursorPosX(ImGui::GetWindowWidth() / 2 - ImGui::CalcTextSize(MainText).x / 2);
 			ImGui::TextColored(ImColor(0.26f, 0.53f, 0.96f, 1.0f),  MainText);
 
-            static char inputBuffer[2056] = { 0 };
-			ImVec2 MultLnTxtSize = ImVec2(ImGui::GetIO().DisplaySize.x * 0.7, ImGui::GetIO().DisplaySize.y * 0.1);
+            static char inputBuffer[2056];
+			ImVec2 MultLnTxtSize = ImVec2(ImGui::GetIO().DisplaySize.x * 0.7f, ImGui::GetIO().DisplaySize.y * 0.1f);
 			ImGui::SetCursorPosY(150.0f);
 			ImGui::SetCursorPosX(ImGui::GetWindowWidth() / 2 - MultLnTxtSize.x / 2);
             ImGui::InputTextMultiline("##input", inputBuffer, sizeof(inputBuffer), MultLnTxtSize, ImGuiInputTextFlags_AllowTabInput);
+
 
 		} ImGui::End();
 
