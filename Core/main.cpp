@@ -12,6 +12,7 @@
 #include <d3d11.h>
 #include <tchar.h>
 #include <string>
+#include <iostream>
 
 // Data
 static ID3D11Device* g_pd3dDevice = nullptr;
@@ -91,7 +92,7 @@ int main(int, char**)
 	bool opend = true;
 	bool done = false;
 	bool isb1pressed = false;
-
+	int f11PressCount = 0;
 	// Main loop
 	while (!done)
 	{
@@ -137,6 +138,8 @@ int main(int, char**)
 		style.Colors[ImGuiCol_WindowBg] = ImColor(0.0f, 0.0f, 0.0f, 1.0f);
 		style.WindowBorderSize = 0.0f;
 
+
+
 		if (ImGui::Begin("##window1ID", &opend, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove)) {
 			const char* MainText = "Start A Test";
 			ImGuiStyle& style = ImGui::GetStyle();
@@ -150,7 +153,30 @@ int main(int, char**)
 			ImGui::SetCursorPosX(ImGui::GetWindowWidth() / 2 - MultLnTxtSize.x / 2);
             ImGui::InputTextMultiline("##input", inputBuffer, sizeof(inputBuffer), MultLnTxtSize, ImGuiInputTextFlags_AllowTabInput);
 
-
+			//Change Window mode on runtime
+			ImGui::SetCursorPosY(250.0f);
+			
+			if (ImGui::IsKeyPressed(ImGuiKey_F11)) {
+				if (f11PressCount == 0) {
+					SetWindowLongPtr(hwnd, GWL_STYLE, WS_OVERLAPPEDWINDOW);
+					SetWindowPos(hwnd, 0, 100, 100, 600, 400, SWP_SHOWWINDOW);
+					f11PressCount = 1;
+				}
+				else if (f11PressCount == 2) {
+                    SetWindowLongPtr(hwnd, GWL_STYLE, WS_POPUP);
+                    SetWindowPos(hwnd, 0, 0, 0, scrnw, scrny, SWP_SHOWWINDOW);
+					f11PressCount = 3;
+				}
+			}
+			if (ImGui::IsKeyReleased(ImGuiKey_F11)) {
+				if (f11PressCount == 1) {
+					f11PressCount = 2;
+				}
+				else if (f11PressCount == 3) {
+					f11PressCount = 0;
+				}
+			
+			}
 		} ImGui::End();
 
 		// Rendering
