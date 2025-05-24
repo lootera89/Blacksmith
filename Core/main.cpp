@@ -93,6 +93,8 @@ int main(int, char**)
 	bool done = false;
 	bool isb1pressed = false;
 	int f11PressCount = 0;
+	int esc = 1;
+
 	// Main loop
 	while (!done)
 	{
@@ -138,8 +140,6 @@ int main(int, char**)
 		style.Colors[ImGuiCol_WindowBg] = ImColor(0.0f, 0.0f, 0.0f, 1.0f);
 		style.WindowBorderSize = 0.0f;
 
-
-
 		if (ImGui::Begin("##window1ID", &opend, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove)) {
 			const char* MainText = "Start A Test";
 			ImGuiStyle& style = ImGui::GetStyle();
@@ -159,7 +159,7 @@ int main(int, char**)
 			if (ImGui::IsKeyPressed(ImGuiKey_F11)) {
 				if (f11PressCount == 0) {
 					SetWindowLongPtr(hwnd, GWL_STYLE, WS_OVERLAPPEDWINDOW);
-					SetWindowPos(hwnd, 0, 100, 100, 600, 400, SWP_SHOWWINDOW);
+					SetWindowPos(hwnd, 0, 0, 0, scrnw, scrny, SWP_SHOWWINDOW);
 					f11PressCount = 1;
 				}
 				else if (f11PressCount == 2) {
@@ -176,6 +176,13 @@ int main(int, char**)
 					f11PressCount = 0;
 				}
 			
+			}
+			
+			if (ImGui::IsKeyPressed(ImGuiKey_Escape)) {
+				if (esc == 1) {
+					ImGui::End();
+					esc = 3;
+				}
 			}
 		} ImGui::End();
 
