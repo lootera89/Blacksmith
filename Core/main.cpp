@@ -85,10 +85,6 @@ int main(int, char**)
 	bool show_another_window = false;
 	ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
-	//Set Main Window Size and pos
-
-	ImGui::SetNextWindowPos(ImVec2(0.0f, 0.0f));
-	ImGui::SetNextWindowSize(ImGui::GetIO().DisplaySize);
 
 	//base variables
 	bool opend = true;
@@ -134,17 +130,20 @@ int main(int, char**)
 		ImGui::NewFrame();
 
 		// Here goes the window
+		ImGui::SetNextWindowPos(ImVec2(0.0f, 0.0f));
+		ImGui::SetNextWindowSize(ImGui::GetIO().DisplaySize);
 		if (ImGui::Begin("window1ID", &opend, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove)) {
 			const char* MainText = "Start A Test";
 			ImGui::SetCursorPosY(40.0f);
 			ImGui::SetCursorPosX(ImGui::GetWindowWidth() / 2 - ImGui::CalcTextSize(MainText).x / 2);
-			ImGui::Text(MainText);
+			ImGui::TextColored(ImColor(0.26f, 0.53f, 0.96f, 1.0f),  MainText);
 
             static char inputBuffer[2056] = { 0 };
-			ImVec2 MultLnTxtSize = ImVec2(ImGui::GetIO().DisplaySize.x * 0.7, ImGui::GetIO().DisplaySize.y * 0.7);
+			ImVec2 MultLnTxtSize = ImVec2(ImGui::GetIO().DisplaySize.x * 0.7, ImGui::GetIO().DisplaySize.y * 0.1);
 			ImGui::SetCursorPosY(150.0f);
 			ImGui::SetCursorPosX(ImGui::GetWindowWidth() / 2 - MultLnTxtSize.x / 2);
             ImGui::InputTextMultiline("##input", inputBuffer, sizeof(inputBuffer), MultLnTxtSize, ImGuiInputTextFlags_AllowTabInput);
+
 		} ImGui::End();
 
 		// Rendering
