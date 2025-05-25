@@ -36,6 +36,12 @@
     <ClInclude Include="IMGUI\backends\imgui_impl_win32.h">
       <Filter>IMGUI\backends</Filter>
     </ClInclude>
+    <ClInclude Include="Core\main.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\pickword.h">
+      <Filter>Core</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="IMGUI\imgui.cpp">
@@ -60,6 +66,9 @@
       <Filter>IMGUI\backends</Filter>
     </ClCompile>
     <ClCompile Include="Core\main.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\pickword.cpp">
       <Filter>Core</Filter>
     </ClCompile>
   </ItemGroup>

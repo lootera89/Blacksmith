@@ -1,18 +1,13 @@
-// Dear ImGui: standalone example application for DirectX 11
-
-// Learn about Dear ImGui:
-// - FAQ                  https://dearimgui.com/faq
-// - Getting Started      https://dearimgui.com/getting-started
-// - Documentation        https://dearimgui.com/docs (same as your local docs/ folder).
-// - Introduction, links and more at the top of imgui.cpp
-
-#include <IMGUI\imgui.h>
+﻿#include <IMGUI\imgui.h>
 #include <IMGUI\backends\imgui_impl_win32.h>
 #include <IMGUI\backends\imgui_impl_dx11.h>
 #include <d3d11.h>
 #include <tchar.h>
 #include <string>
 #include <iostream>
+#include "main.h"
+#include "pickword.h"
+#include <vector>
 
 // Data
 static ID3D11Device* g_pd3dDevice = nullptr;
@@ -87,13 +82,9 @@ int main(int, char**)
 	bool show_another_window = false;
 	ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
-
-	//base variables
-	bool opend = true;
-	bool done = false;
-	bool isb1pressed = false;
-	int f11PressCount = 0;
-	int esc = 1;
+	// Load bigger font (in your setup, e.g. before ImGui::NewFrame())
+	io.Fonts->AddFontFromFileTTF("C:\\Windows\\Fonts\\consola.ttf", 28.0f); // Or any TTF
+	// Adjust size/font path if needed
 
 	// Main loop
 	while (!done)
@@ -133,29 +124,153 @@ int main(int, char**)
 		ImGui_ImplWin32_NewFrame();
 		ImGui::NewFrame();
 
-		// Here goes the window
-		ImGui::SetNextWindowPos(ImVec2(0.0f, 0.0f));
-		ImGui::SetNextWindowSize(ImGui::GetIO().DisplaySize);
 		ImGuiStyle& style = ImGui::GetStyle();
-		style.Colors[ImGuiCol_WindowBg] = ImColor(0.0f, 0.0f, 0.0f, 1.0f);
+		style.Colors[ImGuiCol_WindowBg] = ImColor(0, 0, 0, 255);
+		style.Colors[ImGuiCol_ChildBg] = ImColor(255, 255, 255, 20);
+		style.ChildRounding = 12.0f;
 		style.WindowBorderSize = 0.0f;
 
-		if (ImGui::Begin("##window1ID", &opend, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove)) {
-			const char* MainText = "Start A Test";
-			ImGuiStyle& style = ImGui::GetStyle();
-			ImGui::SetCursorPosY(40.0f);
-			ImGui::SetCursorPosX(ImGui::GetWindowWidth() / 2 - ImGui::CalcTextSize(MainText).x / 2);
-			ImGui::TextColored(ImColor(0.26f, 0.53f, 0.96f, 1.0f),  MainText);
+		ImGui::SetNextWindowPos(ImVec2(0.0f, 0.0f));
+		ImGui::SetNextWindowSize(ImGui::GetIO().DisplaySize);
 
-            static char inputBuffer[2056];
-			ImVec2 MultLnTxtSize = ImVec2(ImGui::GetIO().DisplaySize.x * 0.7f, ImGui::GetIO().DisplaySize.y * 0.1f);
-			ImGui::SetCursorPosY(150.0f);
-			ImGui::SetCursorPosX(ImGui::GetWindowWidth() / 2 - MultLnTxtSize.x / 2);
-            ImGui::InputTextMultiline("##input", inputBuffer, sizeof(inputBuffer), MultLnTxtSize, ImGuiInputTextFlags_AllowTabInput);
+		if (ImGui::Begin("##MainWindow", nullptr,
+			ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse |
+			ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove |
+			ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse)) {
 
-			//Change Window mode on runtime
-			ImGui::SetCursorPosY(250.0f);
-			
+			ImDrawList* drawList = ImGui::GetWindowDrawList();
+			const float screenWidth = ImGui::GetIO().DisplaySize.x;
+			const float screenHeight = ImGui::GetIO().DisplaySize.y;
+
+			// ----- BACKGROUND -----
+			drawList->AddRectFilledMultiColor(
+				ImVec2(0, 0), ImVec2(screenWidth, screenHeight),
+				IM_COL32(10, 10, 10, 255), IM_COL32(5, 5, 5, 255),
+				IM_COL32(15, 15, 15, 255), IM_COL32(10, 10, 10, 255)
+			);
+
+			// ----- RADIO SEGMENTED CONTROL -----
+			const char* timeOptions[] = { "30s", "60s", "120s" };
+			static int selectedTime = 1;
+			float segmentWidth = 60.0f;
+			float segmentHeight = 28.0f;
+			float groupWidth = segmentWidth * 3;
+			float startX = (screenWidth - groupWidth) / 2.0f;
+			float startY = screenHeight * 0.16f;
+
+			ImVec2 groupStart = ImVec2(startX, startY);
+			ImVec2 groupEnd = ImVec2(startX + groupWidth, startY + segmentHeight);
+			drawList->AddRectFilled(groupStart, groupEnd, IM_COL32(25, 25, 25, 200), 8.0f);
+
+			for (int i = 0; i < 3; ++i) {
+				ImVec2 btnStart = ImVec2(startX + i * segmentWidth, startY);
+				ImVec2 btnEnd = ImVec2(btnStart.x + segmentWidth, btnStart.y + segmentHeight);
+				bool hovered = ImGui::IsMouseHoveringRect(btnStart, btnEnd);
+				bool clicked = ImGui::IsMouseClicked(0) && hovered;
+
+				ImU32 fillColor = selectedTime == i
+					? IM_COL32(20, 40, 90, 255)
+					: hovered ? IM_COL32(60, 60, 60, 200)
+					: IM_COL32(40, 40, 40, 150);
+
+				drawList->AddRectFilled(btnStart, btnEnd, fillColor,
+					i == 0 ? 8.0f : (i == 2 ? 8.0f : 0.0f),
+					i == 0 ? ImDrawFlags_RoundCornersLeft : (i == 2 ? ImDrawFlags_RoundCornersRight : 0)
+				);
+
+				if (i > 0) {
+					drawList->AddLine(
+						ImVec2(btnStart.x, btnStart.y),
+						ImVec2(btnStart.x, btnEnd.y),
+						IM_COL32(70, 70, 70, 150), 1.0f
+					);
+				}
+
+				ImVec2 labelSize = ImGui::CalcTextSize(timeOptions[i]);
+				ImVec2 labelPos = ImVec2(btnStart.x + (segmentWidth - labelSize.x) / 2.0f,
+					btnStart.y + (segmentHeight - labelSize.y) / 2.0f);
+				drawList->AddText(labelPos, IM_COL32(255, 255, 255, 255), timeOptions[i]);
+
+				if (clicked) selectedTime = i;
+			}
+
+			// ----- FROSTED GLASS TYPING BOX -----
+			const float boxWidth = screenWidth * 0.8f;
+			const float boxHeight = screenHeight * 0.5f;
+			const float boxX = (screenWidth - boxWidth) / 2.0f;
+			const float boxY = screenHeight * 0.3f;
+			ImVec2 boxPos = ImVec2(boxX, boxY);
+			ImVec2 boxEnd = ImVec2(boxX + boxWidth, boxY + boxHeight);
+
+			drawList->AddRectFilled(boxPos, boxEnd, IM_COL32(255, 255, 255, 35), 15.0f);
+			drawList->AddRect(boxPos, boxEnd, IM_COL32(255, 255, 255, 40), 15.0f);
+			drawList->AddRectFilledMultiColor(
+				boxPos, ImVec2(boxEnd.x, boxPos.y + 20),
+				IM_COL32(255, 255, 255, 60), IM_COL32(255, 255, 255, 30),
+				IM_COL32(255, 255, 255, 15), IM_COL32(255, 255, 255, 5)
+			);
+
+			// ----- TYPING LOGIC -----
+			static std::vector<std::string> testWords;
+			static bool wordsInitialized = false;
+			static pickword pw;
+
+			if (!wordsInitialized) {
+				testWords.clear();
+				for (int i = 0; i < 2000; ++i)
+					testWords.push_back(pw.getword(80));
+				wordsInitialized = true;
+			}
+
+			static char inputBuffer[8192] = "";
+			size_t bufferIndex = 0;
+
+			float padding = 30.0f;
+			float x = boxPos.x + padding;
+			float y = boxPos.y + 20.0f;
+			float endX = boxEnd.x - padding;
+			float bottomY = boxEnd.y - padding;
+			float spaceSize = ImGui::CalcTextSize(" ").x;
+			float lineSpacing = 8.0f;
+			float lineHeight = ImGui::GetFont()->FontSize + lineSpacing;
+
+			std::vector<std::string> wordsToRender(testWords.begin(), testWords.begin() + std::min<int>(testWords.size(), 2000));
+			for (const std::string& word : wordsToRender) {
+				float wordWidth = ImGui::CalcTextSize(word.c_str()).x;
+
+				if (x + wordWidth > endX) {
+					x = boxPos.x + padding;
+					y += lineHeight;
+					if (y + lineHeight > bottomY) break;
+				}
+
+				for (char c : word) {
+					ImU32 col;
+					if (bufferIndex < strlen(inputBuffer))
+						col = (inputBuffer[bufferIndex] == c) ? IM_COL32(255, 255, 255, 255) : IM_COL32(255, 70, 70, 255);
+					else
+						col = IM_COL32(180, 180, 180, 100);
+
+					char buf[2] = { c, '\0' };
+					drawList->AddText(ImVec2(x + 1, y + 1), IM_COL32(0, 0, 0, 100), buf);
+					drawList->AddText(ImVec2(x, y), col, buf);
+
+					x += ImGui::CalcTextSize(buf).x;
+					bufferIndex++;
+				}
+
+				x += spaceSize;
+				bufferIndex++;
+			}
+
+			// ----- INVISIBLE TEXT INPUT -----
+			ImGui::SetCursorPos(ImVec2(-1000, -1000));
+			ImGui::PushItemWidth(0);
+			ImGui::SetKeyboardFocusHere();
+			ImGui::InputText("##hiddeninput", inputBuffer, IM_ARRAYSIZE(inputBuffer), ImGuiInputTextFlags_None);
+			ImGui::PopItemWidth();
+
+			// ----- FULLSCREEN TOGGLE -----
 			if (ImGui::IsKeyPressed(ImGuiKey_F11)) {
 				if (f11PressCount == 0) {
 					SetWindowLongPtr(hwnd, GWL_STYLE, WS_OVERLAPPEDWINDOW);
@@ -163,28 +278,22 @@ int main(int, char**)
 					f11PressCount = 1;
 				}
 				else if (f11PressCount == 2) {
-                    SetWindowLongPtr(hwnd, GWL_STYLE, WS_POPUP);
-                    SetWindowPos(hwnd, 0, 0, 0, scrnw, scrny, SWP_SHOWWINDOW);
+					SetWindowLongPtr(hwnd, GWL_STYLE, WS_POPUP);
+					SetWindowPos(hwnd, 0, 0, 0, scrnw, scrny, SWP_SHOWWINDOW);
 					f11PressCount = 3;
 				}
 			}
 			if (ImGui::IsKeyReleased(ImGuiKey_F11)) {
-				if (f11PressCount == 1) {
-					f11PressCount = 2;
-				}
-				else if (f11PressCount == 3) {
-					f11PressCount = 0;
-				}
-			
+				if (f11PressCount == 1) f11PressCount = 2;
+				else if (f11PressCount == 3) f11PressCount = 0;
 			}
-			
+
 			if (ImGui::IsKeyPressed(ImGuiKey_Escape)) {
-				if (esc == 1) {
-					ImGui::End();
-					esc = 3;
-				}
+				static bool once = []() { exit(0); return true; }();
 			}
-		} ImGui::End();
+		}
+		ImGui::End();
+
 
 		// Rendering
 		ImGui::Render();
@@ -192,6 +301,7 @@ int main(int, char**)
 		g_pd3dDeviceContext->OMSetRenderTargets(1, &g_mainRenderTargetView, nullptr);
 		g_pd3dDeviceContext->ClearRenderTargetView(g_mainRenderTargetView, clear_color_with_alpha);
 		ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
+
 
 		// Present
 		HRESULT hr = g_pSwapChain->Present(1, 0);   // Present with vsync
